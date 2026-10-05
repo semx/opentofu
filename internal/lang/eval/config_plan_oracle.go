@@ -12,7 +12,6 @@ import (
 	"github.com/opentofu/opentofu/internal/lang/eval/internal/evalglue"
 	"github.com/opentofu/opentofu/internal/lang/exprs"
 	"github.com/opentofu/opentofu/internal/providers"
-	"github.com/opentofu/opentofu/internal/refactoring"
 	"github.com/opentofu/opentofu/internal/tfdiags"
 )
 
@@ -21,12 +20,6 @@ import (
 type PlanningOracle struct {
 	root      evalglue.CompiledModuleInstance
 	providers *managedProviders
-}
-
-// MoveStatementsFor queries the root module for any move statements along the given path.
-// This should eventually be replaced with ResourceInstanceObjectMeta.
-func (o *PlanningOracle) MoveStatementsFor(ctx context.Context, addr addrs.Module) []refactoring.MoveStatement {
-	return o.root.GetMoveStatementsFor(ctx, addr)
 }
 
 // DetectImplicitMoveForAddress spiders the configuration, attempting to determine if there is an implicit
@@ -67,13 +60,7 @@ func (o *PlanningOracle) DetectImplicitMoveForAddress(ctx context.Context, addr 
 // the same problem to be reported more than once in different ways and that's
 // confusing.
 func (o *PlanningOracle) ResourceInstanceObjectMeta(ctx context.Context, addr addrs.AbsResourceInstanceObject) *ConfiguredResourceInstanceObjectMeta {
-	moduleInst := evalglue.ModuleInstance(ctx, o.root, addr.InstanceAddr.Module)
-	if moduleInst == nil {
-		// The relevant module instance is not currently configured at all,
-		// so the caller will need to rely on the state exclusively for this one.
-		return nil
-	}
-	return moduleInst.ResourceInstanceObjectMeta(ctx, addr.ModuleRelative())
+	return o.root.ResourceInstanceObjectMeta(ctx, addr)
 }
 
 // ProviderInstanceConfig returns a value representing the configuration to
