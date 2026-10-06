@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/opentofu/opentofu/internal/addrs"
+	"github.com/opentofu/opentofu/internal/lang/eval/internal/configgraph"
 	"github.com/opentofu/opentofu/internal/lang/eval/internal/evalglue"
 	"github.com/opentofu/opentofu/internal/providers"
 	"github.com/opentofu/opentofu/internal/tfdiags"
@@ -60,6 +61,13 @@ func (o *PlanningOracle) DetectImplicitMoveForAddress(ctx context.Context, addr 
 // confusing.
 func (o *PlanningOracle) ResourceInstanceObjectMeta(ctx context.Context, addr addrs.AbsResourceInstanceObject) *ConfiguredResourceInstanceObjectMeta {
 	return o.root.ResourceInstanceObjectMeta(ctx, addr)
+}
+
+type ImportInstance = configgraph.ImportInstance
+
+// Used for validation
+func (o *PlanningOracle) CollectImports(ctx context.Context) []ImportInstance {
+	panic("TODO")
 }
 
 // ProviderInstanceConfig returns a value representing the configuration to
