@@ -119,6 +119,9 @@ func normalPlan(ctx context.Context, opts *PlanOpts, prevRoundState *states.Stat
 	// We also need to check for invalid moves
 	diags = diags.Append(planGlue.validateMoves(ctx))
 
+	// Check imports
+	diags = diags.Append(planGlue.validateImports(ctx))
+
 	// Record output values and resource dependencies for the plan
 	planCtx.rootOutput.Previous = prevRoundState.EnsureModule(addrs.RootModuleInstance).OutputValues
 	planCtx.rootOutput.Current = evalResult.RootModuleOutputs
