@@ -6,11 +6,13 @@
 package funcs
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/opentofu/opentofu/internal/lang/marks"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/function"
 )
 
 func TestLog(t *testing.T) {
@@ -45,6 +47,24 @@ func TestLog(t *testing.T) {
 			cty.NumberFloatVal(-0),
 			false,
 		},
+		{
+			cty.NumberFloatVal(10),
+			cty.NumberFloatVal(1),
+			cty.PositiveInfinity,
+			false,
+		},
+		{ // NaN
+			cty.NumberFloatVal(-1),
+			cty.NumberFloatVal(10),
+			cty.NilVal,
+			true,
+		},
+		{
+			cty.NumberFloatVal(10),
+			cty.NumberFloatVal(-1),
+			cty.NilVal,
+			true,
+		},
 	}
 
 	for _, test := range tests {
@@ -54,6 +74,10 @@ func TestLog(t *testing.T) {
 			if test.Err {
 				if err == nil {
 					t.Fatal("succeeded; want error")
+				}
+				var panicErr function.PanicError
+				if errors.As(err, &panicErr) {
+					t.Fatalf("got a panic instead of an error: %s", err)
 				}
 				return
 			} else if err != nil {
@@ -123,6 +147,24 @@ func TestPow(t *testing.T) {
 			cty.NumberFloatVal(0),
 			false,
 		},
+		{
+			cty.NumberFloatVal(0),
+			cty.NumberFloatVal(-1),
+			cty.PositiveInfinity,
+			false,
+		},
+		{ // NaN
+			cty.NumberFloatVal(-1),
+			cty.NumberFloatVal(0.5),
+			cty.NilVal,
+			true,
+		},
+		{
+			cty.NumberFloatVal(-8),
+			cty.NumberFloatVal(1.0 / 3),
+			cty.NilVal,
+			true,
+		},
 	}
 
 	for _, test := range tests {
@@ -132,6 +174,10 @@ func TestPow(t *testing.T) {
 			if test.Err {
 				if err == nil {
 					t.Fatal("succeeded; want error")
+				}
+				var panicErr function.PanicError
+				if errors.As(err, &panicErr) {
+					t.Fatalf("got a panic instead of an error: %s", err)
 				}
 				return
 			} else if err != nil {

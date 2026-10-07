@@ -20,6 +20,7 @@ ENHANCEMENTS:
 
 BUG FIXES:
 
+- `log` and `pow` now return a proper error for results that are not real numbers, such as `log(-1, 10)` or `pow(-1, 0.5)`, instead of an internal panic. ([#4520](https://github.com/opentofu/opentofu/issues/4520))
 - `tofu fmt`: Fixed wrong resolution of paths when the working directory is a symlink; output now shows absolute file paths instead of giving error `Invalid file or directory path`. ([#3879](https://github.com/opentofu/opentofu/issues/3879))
 - OpenTelemetry tracing support now honors the standard OpenTelemetry environment variable `OTEL_RESOURCE_ATTRIBUTES` for specifying arbitrary additional resource attribute values to be added to traces. Previously we only supported `OTEL_SERVICE_NAME` for overriding the `service.name` attribute. ([#4621](https://github.com/opentofu/opentofu/issues/4621))
 

@@ -6,6 +6,7 @@
 package funcs
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 
@@ -39,11 +40,15 @@ var LogFunc = function.New(&function.Spec{
 			return cty.UnknownVal(cty.String), err
 		}
 
-		return cty.NumberFloatVal(math.Log(num) / math.Log(base)), nil
+		result := math.Log(num) / math.Log(base)
+		if math.IsNaN(result) { // NumberFloatVal panics on NaN
+			return cty.UnknownVal(cty.Number), fmt.Errorf("the logarithm of %s in base %s is not defined", args[0].AsBigFloat().Text('g', -1), args[1].AsBigFloat().Text('g', -1))
+		}
+		return cty.NumberFloatVal(result), nil
 	},
 })
 
-// PowFunc constructs a function that returns the logarithm of a given number in a given base.
+// PowFunc constructs a function that returns a given number raised to a given power.
 var PowFunc = function.New(&function.Spec{
 	Params: []function.Parameter{
 		{
@@ -68,7 +73,11 @@ var PowFunc = function.New(&function.Spec{
 			return cty.UnknownVal(cty.String), err
 		}
 
-		return cty.NumberFloatVal(math.Pow(num, power)), nil
+		result := math.Pow(num, power)
+		if math.IsNaN(result) { // NumberFloatVal panics on NaN
+			return cty.UnknownVal(cty.Number), fmt.Errorf("%s raised to the power %s is not a real number", args[0].AsBigFloat().Text('g', -1), args[1].AsBigFloat().Text('g', -1))
+		}
+		return cty.NumberFloatVal(result), nil
 	},
 })
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -1463,6 +1464,35 @@ func TestFunctions(t *testing.T) {
 						t.Errorf("wrong result\nexpr: %s\ngot:  %#v\nwant: %#v", test.src, got, test.want)
 					}
 				})
+			}
+		})
+	}
+}
+
+// log and pow used to hand the user the panic from cty.NumberFloatVal(NaN)
+// as the error message.
+func TestFunctionsNaN(t *testing.T) {
+	for _, src := range []string{
+		`log(-1, 10)`,
+		`pow(-1, 0.5)`,
+	} {
+		t.Run(src, func(t *testing.T) {
+			scope := &Scope{
+				Data:     &dataForTests{},
+				ParseRef: addrs.ParseRef,
+			}
+			expr, parseDiags := hclsyntax.ParseExpression([]byte(src), "test.hcl", hcl.Pos{Line: 1, Column: 1})
+			if parseDiags.HasErrors() {
+				t.Fatal(parseDiags.Error())
+			}
+			_, diags := scope.EvalExpr(t.Context(), expr, cty.DynamicPseudoType)
+			if !diags.HasErrors() {
+				t.Fatal("succeeded; want error")
+			}
+			for _, diag := range diags {
+				if detail := diag.Description().Detail; strings.Contains(detail, "panic") {
+					t.Errorf("got the panic as the error:\n%s", detail)
+				}
 			}
 		})
 	}
